@@ -1,0 +1,69 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N metabat2
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=8:mem=64gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+
+### Bin contigs/scaffolds into putative genomes using metabat2 ###
+
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10
+
+# Following line is needed for conda activate to work
+. ~/.bashrc
+
+conda activate metabat2
+
+
+
+### RUN METABAT2 ###
+
+		
+###############
+### BY HOST ###
+###############
+
+
+# Bin contigs using coverage of mapping reads to scaffolds by host species
+
+for FILE in $(ls ~/Metagenomics/Assembly_and_binning/MetaSpades/*_spades/scaffolds.fasta); do
+
+# Set up variable 
+  PREFIX=$(echo $FILE | cut -d "/" -f 7 | cut -d "_" -f 1)
+
+# Check variables
+  echo "file is $FILE"
+  echo "prefix is $PREFIX"
+
+# Bin contigs
+  metabat2 \
+        -i $FILE \
+        -a ~/Metagenomics/Assembly_and_binning/Coverage_files/By_host/${PREFIX}_depth.txt \
+        -o ~/Metagenomics/Assembly_and_binning/Metabat/${PREFIX}_bins/${PREFIX}_bin \
+        -m 2000 \
+        -t 8 \
+	-v \
+        --unbinned
+done
+
+
+
+
+
+
+
+

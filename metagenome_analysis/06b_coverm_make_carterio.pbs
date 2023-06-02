@@ -1,0 +1,62 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N coverm_car
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=20:mem=60gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+
+### MAKE BAM FILES USING COVERM ###
+
+
+#################################
+### BY HOST - CARTERIOSPONGIA ###
+#################################
+
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10 
+
+# Following line is needed for conda activate to work
+. ~/.bashrc 
+
+conda activate coverm
+
+
+### RUN COVERM ###
+
+
+# Read in file using batch bamm script
+echo "importing scaffold $FILE for bamm alignment"
+
+# Set up variables. 
+PREFIX=$(echo $FILE | cut -d "/" -f 6 | cut -d "_" -f 1)
+
+# Check variables
+echo "file is $FILE" 
+echo "prefix is $PREFIX"
+
+# Run coverM
+# make bam files for each scaffold. Using minimap2 as error with BWA
+coverm make -r $FILE \
+-1 ~/Metagenomics/QC/SOAPnuke/57[6,7,8]_1_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/50[5,7]_1_soapnuke.fq.gz \
+-2 ~/Metagenomics/QC/SOAPnuke/57[6,7,8]_2_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/50[5,7]_2_soapnuke.fq.gz \
+-t 20 \
+-o /scratch/jc254091/Metagenomics/Bam_files/${PREFIX}/
+
+#-p bwa-mem: error trying to use BWA alignment
+
+# NOTE: JGI script used to get coverage from bam files
+
+# End Script

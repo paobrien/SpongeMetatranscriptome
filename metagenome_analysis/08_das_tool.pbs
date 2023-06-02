@@ -1,0 +1,115 @@
+#!/bin/sh
+
+#PBS -j oe
+#PBS -m ae
+#PBS -N das_tool
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=12:mem=64gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+
+# Use DAS Tool to pick the highest quality MAGs from different binning programs
+
+
+# Load modules
+module load anaconda3/2019.10 
+. ~/.bashrc 
+conda activate das_tool
+
+
+###############
+### BY HOST ###
+###############
+
+## PER SAMPLE ##
+
+# First format input files to a tab-separated file with contigs on the left and bins on the right 
+
+
+# For Maxbin
+#for DIR in $(ls ~/Metagenomics/Assembly_and_binning/Maxbin/); do
+#  echo "converting bins in folder $DIR"
+#  Fasta_to_Scaffolds2Bin.sh -i ~/Metagenomics/Assembly_and_binning/Maxbin/${DIR}/ -e fasta > ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/${DIR}_maxbin.scaffolds2bin.tsv
+#done
+
+# For Metabat2
+#for DIR in $(ls ~/Metagenomics/Assembly_and_binning/Metabat/Metabat2/); do
+#  echo "converting bins in folder $DIR"
+#  Fasta_to_Scaffolds2Bin.sh -i ~/Metagenomics/Assembly_and_binning/Metabat/Metabat2/${DIR}/ -e fa > ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/${DIR}_metabat2.scaffolds2bin.tsv
+#done
+
+# For Metabat1 
+#for DIR in $(ls ~/Metagenomics/Assembly_and_binning/Metabat/Metabat1/); do
+#  echo "converting bins in folder $DIR"
+#  Fasta_to_Scaffolds2Bin.sh -i ~/Metagenomics/Assembly_and_binning/Metabat/Metabat1/${DIR}/ -e fa > ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/${DIR}_metabat1.scaffolds2bin.tsv
+#done
+
+# For concoct
+#for DIR in $(ls ~/Metagenomics/Assembly_and_binning/Concoct/Output/Bins/); do
+#  echo "converting bins in folder $DIR"
+#  Fasta_to_Scaffolds2Bin.sh -i ~/Metagenomics/Assembly_and_binning/Concoct/Output/Bins/${DIR}/ -e fa > ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/${DIR}_concoct.scaffolds2bin.tsv
+#done
+
+
+### RUN DAS TOOL ###
+
+
+# NOTE: must used /home/ and not '~' for home directory comma separated list of input files!
+
+#for FILE in $(ls ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/*_maxbin.scaffolds2bin.tsv); do
+
+# Set up variable
+#  PREFIX=$(basename $FILE | cut -d '_' -f 1)
+#  echo "prefix is $PREFIX"
+
+# run das_tool
+#  DAS_Tool -i /home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/${PREFIX}_bins_maxbin.scaffolds2bin.tsv,/home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/${PREFIX}_bins_metabat2.scaffolds2bin.tsv,/home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/${PREFIX}_sensitive_bins_metabat1.scaffolds2bin.tsv,/home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/${PREFIX}_specific_bins_metabat1.scaffolds2bin.tsv,/home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/${PREFIX}_super_bins_metabat1.scaffolds2bin.tsv,/home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/${PREFIX}_concoct.scaffolds2bin.tsv \
+#  -l maxbin,metabat2,metabat1_sensitive,metabat1_specific,metabat1_super,concoct \
+#  -c ~/Metagenomics/Assembly_and_binning/MetaSpades/${PREFIX}_spades/scaffolds.fasta \
+#  -o ~/Metagenomics/Assembly_and_binning/DasTool/Output/${PREFIX}/${PREFIX} \
+#  --search_engine blast \
+#  --write_bins 1 \
+#  -t 8
+#done
+
+
+
+## -------------------------------------------------------------------------------------------------- ##
+
+
+## COMBINED ##
+
+# format input
+
+# Maxbin
+#Fasta_to_Scaffolds2Bin.sh -i ~/Metagenomics/Assembly_and_binning/Maxbin/Combined/ -e fasta > ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_maxbin.scaffolds2bin.tsv
+
+# Metabat2
+#Fasta_to_Scaffolds2Bin.sh -i ~/Metagenomics/Assembly_and_binning/Metabat/Metabat2/Combined/ -e fa > ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_metabat2.scaffolds2bin.tsv
+
+# Concoct
+#Fasta_to_Scaffolds2Bin.sh -i ~/Metagenomics/Assembly_and_binning/Concoct/Output/Bins/Combined/ -e fa > ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_concoct.scaffolds2bin.tsv
+
+# Metabat1 
+#Fasta_to_Scaffolds2Bin.sh -i ~/Metagenomics/Assembly_and_binning/Metabat/Metabat1/Super_combined/ -e fa > ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_super_metabat1.scaffolds2bin.tsv
+#Fasta_to_Scaffolds2Bin.sh -i ~/Metagenomics/Assembly_and_binning/Metabat/Metabat1/Specific_combined/ -e fa > ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_specific_metabat1.scaffolds2bin.tsv
+#Fasta_to_Scaffolds2Bin.sh -i ~/Metagenomics/Assembly_and_binning/Metabat/Metabat1/Sensitive_combined/ -e fa > ~/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_sensitive_metabat1.scaffolds2bin.tsv
+
+
+# Run das_tool
+DAS_Tool -i /home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_maxbin.scaffolds2bin.tsv,/home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_metabat2.scaffolds2bin.tsv,/home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_sensitive_metabat1.scaffolds2bin.tsv,/home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_specific_metabat1.scaffolds2bin.tsv,/home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_super_metabat1.scaffolds2bin.tsv,/home/jc254091/Metagenomics/Assembly_and_binning/DasTool/Scaffolds2bin/Combined/combined_concoct.scaffolds2bin.tsv \
+-l maxbin,metabat2,metabat1_sensitive,metabat1_specific,metabat1_super,concoct \
+-c ~/Metagenomics/Assembly_and_binning/MetaSpades/concatenated_scaffolds.fasta \
+-o ~/Metagenomics/Assembly_and_binning/DasTool/Output/Combined/combined \
+--search_engine blast \
+--write_bins 1 \
+-t 8

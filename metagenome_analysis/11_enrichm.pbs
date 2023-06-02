@@ -1,0 +1,53 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N enrichm
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=8:mem=16gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+############################################
+
+
+### ANNOTATE AND CLASSIFY GENOMES WITH ENRICHM ### 
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10
+. ~/.bashrc
+conda activate enrichm
+
+# Change directory to database
+export ENRICHM_DB=/scratch/jc254091/databases/
+
+### ANNOTATE GENOMES WITH KO, PFAM, TIGRFAM AND CAZY ###
+
+# First check database and install any necessary updates
+#enrichm data
+
+# Run annotation pipeline
+#enrichm annotate \
+#--output ~/Metagenomics/Annotate/Dastool_95/Annotate \
+#--force \
+#--genome_directory ~/Metagenomics/Assembly_and_binning/Dereplicate/Dastool/95_ani/Bins \
+#--ko \
+#--pfam \
+#--cazy \
+#--threads 16 \
+#--suffix .fa
+
+
+### CLASSIFY AND DETERMINE WHICH KEGG MODULES ARE COMPLETE
+
+enrichm classify \
+--log ~/Metagenomics/Annotate/Dastool_95/Classify/classify.log \
+--output ~/Metagenomics/Annotate/Dastool_95/Classify \
+--force \
+--genome_and_annotation_matrix ~/Metagenomics/Annotate/Dastool_95/Annotate/ko_frequency_table.tsv 

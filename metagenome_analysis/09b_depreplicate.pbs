@@ -1,0 +1,57 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N dereplicate
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=8:mem=360gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+############################################
+
+
+#############################################
+### USE COVERM TO DEREPLICATE GENOME BINS ###
+#############################################
+
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10
+. ~/.bashrc
+conda activate coverm
+conda activate drep
+
+### RUN COVERM CLUSTER ###
+
+#coverm cluster \
+#--genome-fasta-directory ~/Metagenomics/Assembly_and_binning/Bin_refine_metawrap/Refine_3/Consolidated_bins \
+#-x fa \
+#--ani 95 \
+#--checkm-tab-table ~/Metagenomics/QC/CheckM/Metawrap/Consolidated_bins/checkm_cons_metawrap_short.tsv \
+#--output-representative-fasta-directory-copy ~/Metagenomics/Assembly_and_binning/Dereplicate/Metawrap/95_ani \
+#--min-completeness 50 \
+#--max-contamination 10 -t 8
+
+
+### TRYING WITH DREP TO SEE IF THERE IS A DIFFERENCE ###
+
+dRep dereplicate ~/Metagenomics/Assembly_and_binning/Dereplicate/Dastool/dRep \
+-p 8 \
+-comp 50 \
+-con 10 \
+-sa 95 \
+-g ~/Metagenomics/Assembly_and_binning/DasTool/Output/Consolidated_bins/*.fa
+
+
+
+
+
+
+

@@ -1,0 +1,41 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N coverm_iramosa
+#PBS -l walltime=200:00:00
+#PBS -l select=1:ncpus=20:mem=120gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+
+### GET DEPTH COVERAGE USING METABAT SCRIPT ###
+
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10 
+
+# Following line is needed for conda activate to work
+. ~/.bashrc 
+
+conda activate metabat2
+
+jgi_summarize_bam_contig_depths \
+--outputDepth ~/Metagenomics/Assembly_and_binning/Coverage_files/By_host/${PREFIX}_depth.txt \
+/scratch/jc254091/Metagenomics/Coverm/Bam_files/By_host/${PREFIX}/*.bam
+
+### REMOVE BAM FILES TO SAVE DISC SPACE ###
+
+#rm -r /scratch/jc254091/Metagenomics/Coverm/Bam_files/By_host/${PREFIX}/
+
+
+# End Script
+

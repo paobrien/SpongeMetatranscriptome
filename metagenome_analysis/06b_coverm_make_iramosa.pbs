@@ -1,0 +1,78 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N coverm_iramosa
+#PBS -l walltime=200:00:00
+#PBS -l select=1:ncpus=20:mem=120gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+
+### MAKE COVERAGE FILES USING COVERM AND METABAT ###
+
+
+#################################
+### BY HOST - IRCINIA RAMOSA  ###
+#################################
+
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10 
+
+# Following line is needed for conda activate to work
+. ~/.bashrc 
+
+conda activate coverm
+
+
+### RUN COVERM ###
+
+
+# Read in files using 06a_coverm script
+echo "importing scaffold $FILE for bamm alignment"
+
+# Set up variables. 
+PREFIX=$(echo $FILE | cut -d "/" -f 7 | cut -d "_" -f 1)
+
+# Check variables
+echo "file is $FILE" 
+echo "prefix is $PREFIX"
+
+# Run coverM
+# make bam files for each scaffold. Using minimap2
+coverm make -r $FILE \
+-1 ~/Metagenomics/QC/SOAPnuke/50[2,6,8,9]_1_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/51[0-5]_1_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/575_1_soapnuke.fq.gz \
+-2 ~/Metagenomics/QC/SOAPnuke/50[2,6,8,9]_2_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/51[0-5]_2_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/575_2_soapnuke.fq.gz \
+-t 20 \
+-o /scratch/jc254091/Metagenomics/Bam_files/${PREFIX}/
+
+#-p bwa-mem: error trying to use BWA alignment
+
+
+
+### GET DEPTH COVERAGE USING METABAT SCRIPT ###
+
+#conda activate metabat2
+
+#jgi_summarize_bam_contig_depths \
+#--outputDepth ~/Metagenomics/Assembly_and_binning/Coverage_files/By_host/${PREFIX}_depth.txt \
+#/scratch/jc254091/Metagenomics/Coverm/Bam_files/By_host/${PREFIX}/*.bam
+
+
+
+### REMOVE BAM FILES TO SAVE DISC SPACE ###
+
+#rm -r /scratch/jc254091/Metagenomics/Coverm/Bam_files/By_host/${PREFIX}/
+
+
+# End Script
+

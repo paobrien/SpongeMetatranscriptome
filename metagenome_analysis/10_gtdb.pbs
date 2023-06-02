@@ -1,0 +1,72 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N gtdb
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=1:mem=360gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+
+#######################################
+### Classify genome bins using GTDB ###
+#######################################
+
+
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10
+. ~/.bashrc
+conda activate gtdbtk
+
+
+### RUN GTDB-TK ###
+
+
+# Note: need to set cpus to 1 due to issue with pplace memory usage
+
+#for DIR in ~/Metagenomics/Assembly_and_binning/DasTool/Output/5*; do
+
+# check variable
+#  PREFIX=$(basename $DIR)
+#  echo "prexfix is $PREFIX"
+
+# run gtdb
+#  gtdbtk classify_wf \
+#    --genome_dir ~/Metagenomics/Assembly_and_binning/DasTool/Output/${PREFIX}/${PREFIX}_DASTool_bins \
+#    --out_dir ~/Metagenomics/Classify/${PREFIX} \
+#    -x fa \
+#    --prefix $PREFIX \
+#    --cpus 1
+#done 
+
+## Classify dereplicated bins
+
+# run gtdb
+#gtdbtk classify_wf \
+#--genome_dir ~/Metagenomics/Assembly_and_binning/Dereplicate/Metawrap/95_ani/Bins/ \
+#--out_dir ~/Metagenomics/Classify/Dereplicated_metawrap/95_ani \
+#-x fa \
+#--prefix metawrap_95 \
+#--cpus 1
+
+
+# Classify and get phylogeny for all bins
+gtdbtk classify_wf \
+--genome_dir ~/Metagenomics/Assembly_and_binning/DasTool/Output/Consolidated_bins \
+--out_dir ~/Metagenomics/Classify/All_mags \
+-x fa \
+--prefix all_mags \
+--cpus 1
+
+
+## END SCRIPT ##

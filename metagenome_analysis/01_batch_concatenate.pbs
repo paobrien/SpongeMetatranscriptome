@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N batch_concatenate
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=1:mem=32gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+### CONCATENATE READS IN PARALLEL BY FOLDER ### 
+
+# read in folder using 01 bash script and create new variables
+PREF=$(echo $DIR | cut -d "/" -f 6)
+OUT=$(echo $DIR | cut -d "/" -f 1,2,3,4,5)
+
+# check variables
+echo "concatenating reads in folder $DIR"
+echo "sample prefix is $PREF"
+echo "output directory is $OUT"
+
+# concatenate reads
+zcat ${DIR}*_1.fq.gz > ${OUT}/${PREF}_1_concatenated.fq
+zcat ${DIR}*_2.fq.gz > ${OUT}/${PREF}_2_concatenated.fq
+
+# compress files
+gzip ${OUT}/${PREF}_*
+
+# End script
+ 
+

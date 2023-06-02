@@ -1,0 +1,93 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N concoct
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=20:mem=160gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+
+### Bin contigs/scaffolds into putative genomes using CONCOCT ###
+
+
+### LOAD MODULES ###
+
+module load python3/3.6.5
+module load samtools/1.7
+module load bowtie2
+
+### RUN CONCOCT ###
+
+
+###############
+### BY HOST ###
+###############
+
+
+# Bin contigs using coverage of mapping reads to scaffolds by host species
+
+for FILE in $(ls ~/Metagenomics/Assembly_and_binning/MetaSpades/57[5,6,7,8]_spades/scaffolds.fasta); do
+
+# check variables
+  PREFIX=$(echo $FILE | cut -d "/" -f 7 | cut -d "_" -f 1)
+  echo "file is $FILE"
+  echo "prefix is $PREFIX"
+
+# first cut contings into 10K pieces
+  cut_up_fasta.py $FILE -c 10000 -o 0 --merge_last \
+  -b ~/Metagenomics/Assembly_and_binning/Concoct/Cut_contigs/${PREFIX}_contigs_10K.bed > ~/Metagenomics/Assembly_and_binning/Concoct/Cut_contigs/${PREFIX}_contigs_10K.fa
+
+# sort and index bam files
+  for BAM in $(ls /scratch/jc254091/Metagenomics/Bam_files/${PREFIX}/*.bam); do
+
+# get variables
+    BASE=$(basename $BAM | cut -d "." -f 1,2,3)
+    echo "sorting and indexing $BAM"
+    echo "basename is $BASE"
+
+# run samtools
+    samtools sort $BAM -o /scratch/jc254091/Metagenomics/Bam_files/${PREFIX}/${BASE}_sorted.bam -m 40G -@ 4
+    samtools index /scratch/jc254091/Metagenomics/Bam_files/${PREFIX}/${BASE}_sorted.bam -@ 4
+# clean up old files
+    mkdir ~/.TRASH/${PREFIX}
+    mv $BAM ~/.TRASH/${PREFIX}
+  done
+
+# get coverage of smaller contigs
+  concoct_coverage_table.py \
+  ~/Metagenomics/Assembly_and_binning/Concoct/Cut_contigs/${PREFIX}_contigs_10K.bed \
+  /scratch/jc254091/Metagenomics/Bam_files/${PREFIX}/*sorted.bam > ~/Metagenomics/Assembly_and_binning/Concoct/Coverage/${PREFIX}_coverage_table.tsv
+
+# now run concoct
+  mkdir ~/Metagenomics/Assembly_and_binning/Concoct/Output/${PREFIX}/
+  concoct \
+  --composition_file ~/Metagenomics/Assembly_and_binning/Concoct/Cut_contigs/${PREFIX}_contigs_10K.fa \
+  --coverage_file ~/Metagenomics/Assembly_and_binning/Concoct/Coverage/${PREFIX}_coverage_table.tsv \
+  -t 20 \
+  -b ~/Metagenomics/Assembly_and_binning/Concoct/Output/${PREFIX}/${PREFIX}
+
+# merge cuts
+  merge_cutup_clustering.py \
+  ~/Metagenomics/Assembly_and_binning/Concoct/Output/${PREFIX}/${PREFIX}_clustering_gt1000.csv > ~/Metagenomics/Assembly_and_binning/Concoct/Output/${PREFIX}/${PREFIX}_clustering_merged.csv 
+
+# extract bins
+  mkdir ~/Metagenomics/Assembly_and_binning/Concoct/Output/Bins/${PREFIX}/
+  extract_fasta_bins.py \
+  $FILE \
+  ~/Metagenomics/Assembly_and_binning/Concoct/Output/${PREFIX}/${PREFIX}_clustering_merged.csv \
+  --output_path ~/Metagenomics/Assembly_and_binning/Concoct/Output/Bins/${PREFIX}
+done
+
+
+
+# End Script
+

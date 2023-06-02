@@ -1,0 +1,86 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N checkm
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=8:mem=256gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+############################################
+
+
+
+############################################################
+### CHECK QUALITY AND CONTAMINATION LEVEL OF GENOME BINS ###
+############################################################
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10
+. ~/.bashrc
+conda activate checkm-genome
+
+
+
+### RUN CHECKM ###
+
+#########################
+### CONSOLIDATED BINS ###
+#########################
+
+
+## Worflow command option
+
+# get checkm quality
+#checkm lineage_wf \
+#~/Metagenomics/Assembly_and_binning/Bin_refine_metawrap/Refine_3/Consolidated_bins \
+#~/Metagenomics/QC/CheckM/Metawrap/Consolidated_bins \
+#-x fa -t 8
+
+# create checkm file
+#checkm qa \
+#~/Metagenomics/QC/CheckM/Metawrap/Consolidated_bins/lineage.ms \
+#~/Metagenomics/QC/CheckM/Metawrap/Consolidated_bins/ \
+#-o 1 -f checkm_cons_metawrap_short.tsv --tab_table -t 8
+
+
+
+#########################
+### DEREPLICATED BINS ###
+#########################
+
+
+# get checkm quality
+#checkm lineage_wf \
+#~/Metagenomics/QC/CoverM/Dereplicate/Bins \
+#~/Metagenomics/QC/CheckM/Das_tool/Dereplicated_bins \
+#-x fa -t 8
+
+# create checkm file
+#checkm qa \
+#~/Metagenomics/QC/CheckM/Das_tool/Dereplicated_bins/lineage.ms \
+#~/Metagenomics/QC/CheckM/Das_tool/Dereplicated_bins/ \
+#-o 2 -f checkm_derep_bin_stats_long.tsv --tab_table -t 8
+
+# get checkm quality
+checkm lineage_wf \
+~/Metagenomics/Assembly_and_binning/Dereplicate/Metawrap/95_ani/Bins \
+~/Metagenomics/QC/CheckM/Metawrap/Dereplicated_bins/95_ani \
+-x fa -t 8
+
+# create checkm file
+checkm qa \
+~/Metagenomics/QC/CheckM/Metawrap/Dereplicated_bins/95_ani/lineage.ms \
+~/Metagenomics/QC/CheckM/Metawrap/Dereplicated_bins/95_ani \
+-o 2 -f checkm_derep_mw_95_long.tsv --tab_table -t 8
+
+
+
+

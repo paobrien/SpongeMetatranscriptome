@@ -1,0 +1,47 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N SOAPnuke
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=1:mem=8gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+
+### LOAD MODULES ###
+
+module load SOAPnuke/2.1.0
+
+### RUN SOAP NUKE ###
+
+for FILE in $(ls /scratch/jc254091/Metagenomics/Fastq_concatenated/*.fq.gz); do
+# Set up variables. Basename gives the filename at the end of a filepath, dirname gives the path to that file
+  DIR=$(dirname $FILE)
+  SAMPLE=$(basename $FILE | cut -d "_" -f 1)
+
+# Check variables
+  echo "file path is $DIR"
+  echo "SOAPnuking $SAMPLE"
+
+# Run Soapnuke
+  SOAPnuke filter \
+	-1 $DIR/${SAMPLE}_1_concatenated.fq.gz \
+        -2 $DIR/${SAMPLE}_2_concatenated.fq.gz \
+        -C ${SAMPLE}_1_soapnuke.fq.gz \
+        -D ${SAMPLE}_2_soapnuke.fq.gz \
+        -f AAGTCGGAGGCCAAGCGGTCTTAGGAAGACAA \
+        -r AAGTCGGATCGTAGCCATGTCGTTCTGTGAGCCAAGGAGTTG \
+        -l 10 -q 0.1 -m 20 -n 0.003 -Q 2 \
+        -o /scratch/jc254091/Metagenomics/SOAPnuke/
+done
+
+
+ 

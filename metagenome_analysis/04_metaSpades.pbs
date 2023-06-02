@@ -1,0 +1,44 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N metaSpades
+#PBS -l walltime=120:00:00
+#PBS -l select=1:ncpus=40:mem=260gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10
+
+# Following line is needed for conda activate to work
+. ~/.bashrc
+
+conda activate spades
+
+### RUN METASPADES ###
+
+# Load reads in parallel from 04a script
+
+# Forward reads = $FORWARD
+# Reverse reads = $REVERSE
+echo "importing forward reads $FORWARD"
+echo "importing reverse reads $REVERSE"
+
+OUT=$(basename $FORWARD | cut -d "_" -f 1)
+echo "output filename is ${OUT}_spades"
+
+# Run metaSpades	
+metaspades.py -1 $FORWARD -2 $REVERSE -o /scratch/jc254091/Metagenomics/MetaSpades/${OUT}_spades -t 40 -m 250
+
+
+

@@ -1,0 +1,55 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N fastqc
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=1:mem=8gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+##########################################
+
+
+### CHECK SEQUENCE QUALITY WITH FASTQC ###
+
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10 
+
+# Following line is needed for conda activate to work
+. ~/.bashrc 
+
+conda activate fastqc
+
+
+### RUN FASTQC ###
+
+for FILE in $(ls /scratch/jc254091/Metagenomics/Fastq_concatenated/*.fq.gz); do
+# Set up variables. Basename gives the filename at the end of a filepath, dirname gives the path to that file
+  DIR=$(dirname $FILE)
+  SAMPLE=$(basename $FILE | cut -d "_" -f 1)
+
+# Check variables
+  echo "filepath is $DIR"
+  echo "Fastqc sample $SAMPLE"
+
+# Run fastqc
+  fastqc -o ~/Metagenomics/QC/FastQC  --nogroup $DIR/${SAMPLE}_1_concatenated.fq.gz $DIR/${SAMPLE}_2_concatenated.fq.gz
+
+#FastQC will generate two files for each input file, one zipped and one unzipped
+
+done
+
+conda deactivate
+
+
+## END SCRIPT ##
+
+

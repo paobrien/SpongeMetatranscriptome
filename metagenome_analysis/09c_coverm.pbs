@@ -1,0 +1,174 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N coverm
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=20:mem=128gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+############################################
+
+
+### CHECK GENOME QUALITY BY PERCENTAGE OF READS THAT MAP TO GENOME BINS ###
+
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10
+
+# Following line is needed for conda activate to work
+. ~/.bashrc
+
+conda activate coverm
+
+
+### RUN COVERM ###
+
+# Get coverage by host species, as this was how we binned our samples
+
+
+#######################
+### CARTERIOSPONGIA ###
+#######################
+
+#coverm genome \
+#-f ~/Metagenomics/Assembly_and_binning/Dereplicate/Dastool/Bins/57[6,7,8]*.fa ~/Metagenomics/Assembly_and_binning/Dereplicate/Dastool/Bins/50[5,7]*.fa \
+#-1 ~/Metagenomics/QC/SOAPnuke/57[6,7,8]_1_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/50[5,7]_1_soapnuke.fq.gz \
+#-2 ~/Metagenomics/QC/SOAPnuke/57[6,7,8]_2_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/50[5,7]_2_soapnuke.fq.gz \
+#-x fa -t 16 \
+#--output-format sparse
+
+
+###################
+### IRCINIA BLUE ##
+###################
+
+#coverm genome \
+#-f ~/Metagenomics/Assembly_and_binning/Dereplicate/Dastool/Bins/50[1,3,4]*.fa ~/Metagenomics/Assembly_and_binning/Dereplicate/Dastool/Bins/567*.fa ~/Metagenomics/Assembly_and_binning/Dereplicate/Dastool/Bins/516*.fa \
+#-1 ~/Metagenomics/QC/SOAPnuke/50[1,3,4]_1_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/567_1_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/516_1_soapnuke.fq.gz \
+#-2 ~/Metagenomics/QC/SOAPnuke/50[1,3,4]_2_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/567_2_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/516_2_soapnuke.fq.gz \
+#-x fa -t 16 \
+#--output-format sparse
+
+######################
+### IRCINIA RAMOSA ###
+######################
+
+#for DIR in ~/Metagenomics/Assembly_and_binning/DasTool/Output/50[2,6,8,9] \
+#~/Metagenomics/Assembly_and_binning/DasTool/Output/51[0-5] \
+#~/Metagenomics/Assembly_and_binning/DasTool/Output/575; do
+
+#coverm genome \
+#-f ~/Metagenomics/Assembly_and_binning/Dereplicate/Dastool/Bins/50[2,6,8,9]*.fa ~/Metagenomics/Assembly_and_binning/Dereplicate/Dastool/Bins/51[0-5]*.fa ~/Metagenomics/Assembly_and_binning/Dereplicate/Dastool/Bins/575*.fa \
+#-1 ~/Metagenomics/QC/SOAPnuke/50[2,6,8,9]_1_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/51[0-5]_1_soapnuke.fq.g ~/Metagenomics/QC/SOAPnuke/575_1_soapnuke.fq.g \
+#-2 ~/Metagenomics/QC/SOAPnuke/50[2,6,8,9]_2_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/51[0-5]_2_soapnuke.fq.g ~/Metagenomics/QC/SOAPnuke/575_2_soapnuke.fq.g \
+#-x fa -t 16 \
+#--output-format sparse
+
+
+
+###################
+### ALL SAMPLES ###
+###################
+
+# Check genome coverage
+coverm genome \
+-d ~/Metagenomics/Assembly_and_binning/Dereplicate/Metawrap/95_ani/Bins \
+-1 ~/Metagenomics/QC/SOAPnuke/5*_1_soapnuke.fq.gz \
+-2 ~/Metagenomics/QC/SOAPnuke/5*_2_soapnuke.fq.gz \
+-m relative_abundance \
+-x fa -t 20 \
+--output-format dense
+
+
+
+
+
+
+
+###########
+### OLD ###
+###########
+
+
+
+#######################
+### CARTERIOSPONGIA ###
+#######################
+
+
+#for DIR in ~/Metagenomics/Assembly_and_binning/DasTool/Output/57[6,7,8] \
+#~/Metagenomics/Assembly_and_binning/DasTool/Output/50[5,7]; do
+
+# check variables
+#  PREFIX=$(basename $DIR)
+#  echo "prefix is $PREFIX"
+# run coverm
+#  coverm genome \
+#    -d ~/Metagenomics/Assembly_and_binning/DasTool/Output/${PREFIX}/${PREFIX}_DASTool_bins \
+#    -1 ~/Metagenomics/QC/SOAPnuke/${PREFIX}_1_soapnuke.fq.gz \
+#    -2 ~/Metagenomics/QC/SOAPnuke/${PREFIX}_2_soapnuke.fq.gz \
+#    -x fa -t 20 \
+#    --output-format sparse
+#done
+
+
+
+
+###################
+### IRCINIA BLUE ##
+###################
+
+
+#for DIR in ~/Metagenomics/Assembly_and_binning/DasTool/Output/50[1,3,4] \
+#~/Metagenomics/Assembly_and_binning/DasTool/Output/567 \
+#~/Metagenomics/Assembly_and_binning/DasTool/Output/516; do
+
+# check variables
+#  PREFIX=$(basename $DIR)
+#  echo "prefix is $PREFIX"
+# run coverm
+#  coverm genome \
+#    -d ~/Metagenomics/Assembly_and_binning/DasTool/Output/${PREFIX}/${PREFIX}_DASTool_bins \
+#    -1 ~/Metagenomics/QC/SOAPnuke/${PREFIX}_1_soapnuke.fq.gz \
+#    -2 ~/Metagenomics/QC/SOAPnuke/${PREFIX}_2_soapnuke.fq.gz \
+#    -x fa -t 20 \
+#    --output-format sparse
+#done
+
+
+
+######################
+### IRCINIA RAMOSA ###
+######################
+
+#for DIR in ~/Metagenomics/Assembly_and_binning/DasTool/Output/50[2,6,8,9] \
+#~/Metagenomics/Assembly_and_binning/DasTool/Output/51[0-5] \
+#~/Metagenomics/Assembly_and_binning/DasTool/Output/575; do
+
+# check variables
+#  PREFIX=$(basename $DIR)
+#  echo "prefix is $PREFIX"
+# run coverm
+#  coverm genome \
+#    -d ~/Metagenomics/Assembly_and_binning/DasTool/Output/${PREFIX}/${PREFIX}_DASTool_bins \
+#    -1 ~/Metagenomics/QC/SOAPnuke/${PREFIX}_1_soapnuke.fq.gz \
+#    -2 ~/Metagenomics/QC/SOAPnuke/${PREFIX}_2_soapnuke.fq.gz \
+#    -x fa -t 20 \
+#    --output-format sparse
+#done
+
+
+# End Script
+
+
+
+
+

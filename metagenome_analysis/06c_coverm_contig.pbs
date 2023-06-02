@@ -1,0 +1,45 @@
+#!/bin/bash
+#PBS -j oe
+#PBS -m ae
+#PBS -N coverm_contig
+#PBS -l walltime=100:00:00
+#PBS -l select=1:ncpus=20:mem=60gb
+#PBS -M paul.obrien@my.jcu.edu.au
+
+cd $PBS_O_WORKDIR
+shopt -s expand_aliases
+source /etc/profile.d/modules.sh
+echo "Job identifier is $PBS_JOBID"
+echo "Working directory is $PBS_O_WORKDIR"
+
+
+############################################
+
+
+### GET CONTIG COVERAGE USING COVERM ###
+
+### LOAD MODULES ###
+
+module load anaconda3/2019.10
+
+. ~/.bashrc
+
+conda activate coverm
+
+
+### RUN COVERM ###
+
+# using raw reads
+
+# Note format output - sparse = long, dense = wide. Default is dense (more appropriate)
+
+#coverm contig \
+#-r /scratch/jc254091/Metagenomics/MetaSpades/501_spades/scaffolds.fasta \
+#-c ~/Metagenomics/QC/SOAPnuke/50[1,2,3]_1_soapnuke.fq.gz ~/Metagenomics/QC/SOAPnuke/50[1,2,3]_2_soapnuke.fq.gz \
+#-t 20
+
+# using bam files (see if output is the same as above)
+
+coverm contig \
+-b /scratch/jc254091/Metagenomics/Coverm/Bam_files/By_host/501/*.bam \
+-t 20 
